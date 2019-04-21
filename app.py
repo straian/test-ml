@@ -57,5 +57,7 @@ def proc:
   print(np.argmax(predictions[0]))
   print(test_labels[0])
 
-proc()
+with tf.device("/cpu:0"):
+#with tf.device("/device:GPU:0"):
+  proc()
 
