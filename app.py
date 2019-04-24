@@ -1,18 +1,21 @@
 from __future__ import absolute_import, division, print_function
 
-
-
 # TensorFlow and tf.keras
 import tensorflow as tf
 from tensorflow import keras
 
 # Helper libraries
+import os
 import numpy as np
-#import matplotlib.pyplot as plt
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+
+offline = not "DISPLAY" in os.environ
+
+if offline:
+  mpl.use("Agg")
 
 def proc():
-  print(tf.__version__)
-
   fashion_mnist = keras.datasets.fashion_mnist
   (train_images, train_labels), (test_images, test_labels) = fashion_mnist.load_data()
   #print(train_images.shape)
@@ -23,25 +26,31 @@ def proc():
   class_names = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat', 
                  'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
 
-  #plt.figure(figsize=(5, 5))
-  #plt.imshow(train_images[0])
+  plt.figure(figsize=(5, 5))
+  plt.imshow(train_images[0])
 
-  #for i in range(20):
-  #  plt.subplot(5, 4 if i % 2 else 4, i + 1)
-  #  plt.xticks([])
-  #  plt.yticks([])
-  #  plt.grid(False)
-  #  plt.imshow(train_images[i], cmap=plt.cm.binary)
-  #  plt.xlabel(class_names[train_labels[i]])
-  #plt.show()
+  for i in range(20):
+    plt.subplot(5, 4 if i % 2 else 4, i + 1)
+    plt.xticks([])
+    plt.yticks([])
+    plt.grid(False)
+    plt.imshow(train_images[i], cmap=plt.cm.binary)
+    plt.xlabel(class_names[train_labels[i]])
+  if offline:
+    plt.savefig('plot.png')
+  else:
+    plt.show()
 
   #plt.colorbar()
   #plt.grid(False)
   #plt.show()
 
+  print(tf.__version__)
+
   model = keras.Sequential([
       keras.layers.Flatten(input_shape=(28, 28)),
-      keras.layers.Dense(1280, activation=tf.nn.relu),
+      keras.layers.Dense(128, activation=tf.nn.relu),
+      #keras.layers.Dense(1280, activation=tf.nn.relu),
       keras.layers.Dense(10, activation=tf.nn.softmax)
   ])
 
@@ -49,7 +58,7 @@ def proc():
                 loss='sparse_categorical_crossentropy',
                 metrics=['accuracy'])
 
-  model.fit(train_images, train_labels, epochs=5)
+  model.fit(train_images, train_labels, epochs=0)
 
   test_loss, test_acc = model.evaluate(test_images, test_labels)
   print('Test accuracy:', test_acc)
