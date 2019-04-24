@@ -1,14 +1,16 @@
 from __future__ import absolute_import, division, print_function
 
+
+
 # TensorFlow and tf.keras
 import tensorflow as tf
 from tensorflow import keras
 
 # Helper libraries
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
-def proc:
+def proc():
   print(tf.__version__)
 
   fashion_mnist = keras.datasets.fashion_mnist
@@ -39,7 +41,7 @@ def proc:
 
   model = keras.Sequential([
       keras.layers.Flatten(input_shape=(28, 28)),
-      keras.layers.Dense(128, activation=tf.nn.relu),
+      keras.layers.Dense(1280, activation=tf.nn.relu),
       keras.layers.Dense(10, activation=tf.nn.softmax)
   ])
 
@@ -57,7 +59,7 @@ def proc:
   print(np.argmax(predictions[0]))
   print(test_labels[0])
 
-with tf.device("/cpu:0"):
-#with tf.device("/device:GPU:0"):
+#with tf.device("/cpu:0"):
+with tf.device("/device:GPU:0"):
   proc()
 
