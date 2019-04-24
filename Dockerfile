@@ -8,5 +8,5 @@ RUN pip install matplotlib
 
 # TODO: Preload data in image.
 
-COPY app.py .
+COPY ml ml
 
