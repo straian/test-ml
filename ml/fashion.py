@@ -16,9 +16,8 @@ offline = not "DISPLAY" in os.environ
 if offline:
   mpl.use("Agg")
 
-#class_names = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat', 
-#               'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
-class_names = ["plane", "car", "bird", "cat", "deer", "dog", "frog", "horse", "ship", "truck"]
+class_names = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat', 
+               'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
 
 def printImg(ax, i, image, label, predictions=None):
   label = class_names[label]
@@ -63,16 +62,11 @@ def printGallery(images, labels, predictions=None):
     plt.show()
 
 def proc():
-  #fashion_mnist = keras.datasets.fashion_mnist
-  fashion_mnist = keras.datasets.cifar10
-  #fashion_mnist = keras.datasets.cifar100
+  fashion_mnist = keras.datasets.fashion_mnist
   data = fashion_mnist.load_data()
   (train_images, train_labels), (test_images, test_labels) = data
-  train_labels = np.array(list(map(lambda x: x[0], train_labels)))
-  test_labels = np.array(list(map(lambda x: x[0], test_labels)))
 
   print(train_images.shape)
-  print(train_labels)
 
   train_images = train_images / 255.0
   test_images = test_images / 255.0
@@ -88,10 +82,10 @@ def proc():
   print(tf.__version__)
 
   model = keras.Sequential([
-      keras.layers.Reshape((32, 32, 3), input_shape=(32, 32, 3)),
+      keras.layers.Reshape((28, 28, 1), input_shape=(28, 28)),
       keras.layers.Conv2D(32, (5, 5), activation=tf.nn.relu),
       keras.layers.MaxPooling2D(),
-      keras.layers.Conv2D(64, (5, 5), activation=tf.nn.relu),
+      keras.layers.Conv2D(64, (3, 3), activation=tf.nn.relu),
       keras.layers.MaxPooling2D(),
       keras.layers.Flatten(),
       keras.layers.Dense(64, activation=tf.nn.relu),
@@ -110,8 +104,6 @@ def proc():
   test_loss, test_acc = model.evaluate(test_images, test_labels)
   print('Test accuracy:', test_acc)
   predictions = model.predict(test_images)
-  print(predictions[0])
-  print(test_labels)
   printGallery(test_images, test_labels, predictions)
 
 
