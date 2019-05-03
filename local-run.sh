@@ -1,4 +1,4 @@
 #!/bin/bash
 
-python3 ml/app.py
+python3 ml/coco.py
 

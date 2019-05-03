@@ -10,7 +10,7 @@ rm -fr plot.png
 docker rm -f $CONTAINER_NAME
 docker run --runtime=nvidia -it -d --name=$CONTAINER_NAME straian/test-ml bash
 
-docker exec $CONTAINER_NAME python ml/app.py
+docker exec $CONTAINER_NAME python ml/coco.py
 
 docker cp $CONTAINER_NAME:plot.png .
 
