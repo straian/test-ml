@@ -6,13 +6,16 @@ echo $CONTAINER_NAME
 
 docker pull straian/test-ml
 
-rm -fr plot.png
+rm -fr charts
 docker rm -f $CONTAINER_NAME
-docker run --runtime=nvidia -it -d --name=$CONTAINER_NAME straian/test-ml bash
+docker run --runtime=nvidia -dit --name=$CONTAINER_NAME -v `pwd`/datasets:/datasets straian/test-ml bash
 
-docker exec $CONTAINER_NAME python ml/coco.py
+docker exec -t $CONTAINER_NAME rm -fr charts
+docker exec -t $CONTAINER_NAME mkdir charts
 
-docker cp $CONTAINER_NAME:plot.png .
+docker exec -t $CONTAINER_NAME python ml/coco.py
+
+docker cp $CONTAINER_NAME:charts .
 
 docker rm -f $CONTAINER_NAME
 
