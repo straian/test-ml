@@ -85,6 +85,7 @@ for img in imgs:
 
 #TODO: One hot encoding for image segmentation (person or no person) like here
 # https://www.jeremyjordan.me/semantic-segmentation/#representing
+#TODO: Also do cross entropy loss if i have one hot encoding. Acc -> probability, or something?
 
 train_images = np.array(train_images)
 train_targets = np.array(train_targets)

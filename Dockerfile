@@ -4,8 +4,8 @@ RUN apt-get update
 RUN apt-get install -y vim
 RUN apt-get install -y pciutils
 
-COPY download-datasets.sh download-datasets.sh
-RUN bash download-datasets.sh
+#COPY download-datasets.sh download-datasets.sh
+#RUN bash download-datasets.sh
 
 COPY datasets datasets
 #RUN mkdir /root/.keras
