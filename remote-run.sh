@@ -16,9 +16,11 @@ SSH_KEY=~/.ssh/gcloud-test-ml
 
 echo $HOST_ADDR
 
-rm -fr charts
+rm -fr charts-$HOST_ADDR
+rm -fr checkpoints-$HOST_ADDR
 scp -i $SSH_KEY docker-run.sh straian@$HOST_ADDR:.
 ssh -i $SSH_KEY straian@$HOST_ADDR bash docker-run.sh
-scp -r -i $SSH_KEY straian@$HOST_ADDR:charts .
-open charts/*.png
+scp -r -i $SSH_KEY straian@$HOST_ADDR:charts charts-$HOST_ADDR
+scp -r -i $SSH_KEY straian@$HOST_ADDR:checkpoints checkpoints-$HOST_ADDR
+open charts-$HOST_ADDR/*.png
 

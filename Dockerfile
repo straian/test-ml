@@ -8,6 +8,7 @@ RUN pip install cython
 RUN pip install pycocotools
 RUN pip install scikit-image
 RUN pip install matplotlib
+RUN pip install psutil
 
 COPY ml ml
 

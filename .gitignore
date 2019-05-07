@@ -2,4 +2,5 @@ datasets
 ml/panopticapi
 plot.png
 .DS_Store
-charts
+charts*
+checkpoints*
