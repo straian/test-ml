@@ -32,13 +32,12 @@ def show():
   # Closes all the figure windows.
   plt.close('all')
 
-EPOCHS = 100 if offline else 50
+EPOCHS = 50 if offline else 50
 CHART_INTERVAL = 1
-TRAIN_SAMPLES = 10000 if offline else 20
-TEST_SAMPLES = 1
-BATCH_SIZE = 16 if offline else 4
-
-GPUS = 2 if offline else 0
+TRAIN_SAMPLES = 1200000 if offline else 20
+TEST_SAMPLES = 3000 if offline else 1
+GPUS = 1 if offline else 0
+BATCH_SIZE = (16 * GPUS) if offline else 4
 
 if offline:
   mpl.use("Agg")
@@ -55,34 +54,47 @@ def pad(img):
     return np.pad(img, ((p00, p01), (p10, p11), (0, 0)), 'constant')
 
 
+def plot_loss(subplot, epochs, history, test_loss = None):
+  val_loss = subplot.plot(epochs, history['val_loss'], '--', label='Val Loss')
+  subplot.plot(epochs, history['loss'], color=val_loss[0].get_color(), label='Train Loss')
+  if test_loss:
+    subplot.plot(epochs, [test_loss] * len(epochs), label='Test loss')
+  subplot.set_xlabel('Epochs')
+  subplot.set_yscale('log')
+  subplot.set_ylabel('Loss')
+  subplot.set_xlim([0, max(epochs)])
 
-def plot_history(history, test_loss, test_acc):
-  plt.figure(figsize=(12, 6))
-  splt = plt.subplot(1, 2, 1)
-  val_loss = splt.plot(history.epoch, history.history['val_loss'], '--', label='Val Loss')
-  splt.plot(history.epoch, history.history['loss'], color=val_loss[0].get_color(), label='Train Loss')
-  splt.plot(history.epoch, [test_loss] * len(history.epoch), label='Test loss')
-  splt.set_xlabel('Epochs')
-  splt.set_yscale('log')
-  splt.set_ylabel('Loss')
-  splt = plt.subplot(1, 2, 2)
-  val_acc = splt.plot(history.epoch, history.history['val_acc'], '--', label='Val Accuracy')
-  splt.plot(history.epoch, history.history['acc'], color=val_acc[0].get_color(), label='Train Accuracy')
-  splt.plot(history.epoch, [test_acc] * len(history.epoch), label='Test Accuracy')
-  splt.set_xlabel('Epochs')
-  splt.set_yscale('log')
-  splt.set_ylabel('Accuracy')
-  plt.legend()
-  plt.xlim([0, max(history.epoch)])
+def plot_acc(subplot, epochs, history, test_acc = None):
+  val_acc = subplot.plot(epochs, history['val_acc'], '--', label='Val Accuracy')
+  subplot.plot(epochs, history['acc'], color=val_acc[0].get_color(), label='Train Accuracy')
+  if test_acc:
+    subplot.plot(epochs, [test_acc] * len(epochs), label='Test Accuracy')
+  subplot.set_xlabel('Epochs')
+  subplot.set_yscale('log')
+  subplot.set_ylabel('Accuracy')
+  subplot.set_xlim([0, max(epochs)])
 
-def print_images(input, target, predict):
-  plt.figure(figsize=(12, 6))
-  splt = plt.subplot(1, 3, 1)
-  splt.imshow(input)
-  splt = plt.subplot(1, 3, 2)
-  splt.imshow(target)
-  splt = plt.subplot(1, 3, 3)
-  splt.imshow(predict)
+def print_run(
+    train_input, train_target, train_predict, test_input, test_target, test_predict, epoch, history):
+  plt.figure(figsize=(12, 8))
+
+  splt = plt.subplot(2, 4, 1)
+  splt.imshow(train_input)
+  splt = plt.subplot(2, 4, 2)
+  splt.imshow(train_target)
+  splt = plt.subplot(2, 4, 3)
+  splt.imshow(train_predict)
+
+  plot_loss(plt.subplot(2, 4, 4), list(range(epoch + 1)), history)
+
+  splt = plt.subplot(2, 4, 5)
+  splt.imshow(test_input)
+  splt = plt.subplot(2, 4, 6)
+  splt.imshow(test_target)
+  splt = plt.subplot(2, 4, 7)
+  splt.imshow(test_predict)
+
+  plot_acc(plt.subplot(2, 4, 8), list(range(epoch + 1)), history)
 
 # SegNet: https://arxiv.org/pdf/1511.00561.pdf
 # VGG16: https://neurohive.io/en/popular-networks/vgg16/
@@ -99,11 +111,14 @@ model = keras.Sequential([
     keras.layers.Conv2D(256, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
     keras.layers.Conv2D(256, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
     keras.layers.Conv2D(256, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
+    keras.layers.Conv2D(256, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
     keras.layers.MaxPooling2D(),
     keras.layers.Conv2D(512, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
     keras.layers.Conv2D(512, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
     keras.layers.Conv2D(512, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
+    keras.layers.Conv2D(512, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
     keras.layers.MaxPooling2D(),
+    keras.layers.Conv2D(512, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
     keras.layers.Conv2D(512, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
     keras.layers.Conv2D(512, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
     keras.layers.Conv2D(512, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
@@ -111,7 +126,9 @@ model = keras.Sequential([
     keras.layers.Conv2D(512, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
     keras.layers.Conv2D(512, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
     keras.layers.Conv2D(512, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
+    keras.layers.Conv2D(512, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
     keras.layers.UpSampling2D(),
+    keras.layers.Conv2D(256, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
     keras.layers.Conv2D(256, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
     keras.layers.Conv2D(256, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
     keras.layers.Conv2D(256, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
@@ -153,12 +170,12 @@ for img in imgs:
   for ann in anns:
     mask = mask | coco.annToMask(ann)
   mask = mask * 1.
-  if (i < TRAIN_SAMPLES):
-    inputs = train_images
-    targets = train_targets
-  else:
+  if (i < TEST_SAMPLES):
     inputs = test_images
     targets = test_targets
+  else:
+    inputs = train_images
+    targets = train_targets
   input_img = pad(input_img)
   target_img = pad(mask)
   input_img = skimage.transform.resize(input_img, (IMAGE_SIZE, IMAGE_SIZE), anti_aliasing=True)
@@ -186,24 +203,41 @@ model.compile(optimizer='adam',
               loss='binary_crossentropy',
               metrics=['accuracy'])
 
-def predict(epoch):
+logs_history = {
+  'loss': [],
+  'val_loss': [],
+  'acc': [],
+  'val_acc': []
+}
+def epoch_report(epoch, logs):
+  global logs_history
+  logs_history['loss'].append(logs['loss'])
+  logs_history['val_loss'].append(logs['val_loss'])
+  logs_history['acc'].append(logs['acc'])
+  logs_history['val_acc'].append(logs['val_acc'])
   if epoch % CHART_INTERVAL > 0:
     return
-  predictions = model.predict(train_images[0:1])
-  print_images(train_images[0], train_targets[0], predictions[0])
+  train_predictions = model.predict(train_images[0:1])
+  test_predictions = model.predict(test_images[0:1])
+  print_run(
+      train_images[0], train_targets[0], train_predictions[0],
+      test_images[0], test_targets[0], test_predictions[0], epoch, logs_history)
+  plt.tight_layout()
   show()
 
 fit_callback = keras.callbacks.LambdaCallback(
-    on_epoch_begin=lambda epoch, logs: predict(epoch))
+    on_epoch_end=lambda epoch, logs: epoch_report(epoch, logs))
 
 #with tf.device("/cpu:0"):
-with tf.device("/device:GPU:0"):
-  history = model.fit(train_images, train_targets, validation_split=0.1, epochs=EPOCHS, batch_size=BATCH_SIZE, callbacks=[fit_callback])
-  print(history)
-  test_loss, test_acc = model.evaluate(test_images, test_targets)
-  plot_history(history, test_loss, test_acc)
-  show()
-  print('Test loss:', test_loss)
-  print('Test accuracy:', test_acc)
+#with tf.device("/device:GPU:0"):
+history = model.fit(train_images, train_targets, validation_split=0.1, epochs=EPOCHS, batch_size=BATCH_SIZE, callbacks=[fit_callback])
+test_loss, test_acc = model.evaluate(test_images, test_targets)
+print('Test loss:', test_loss)
+print('Test accuracy:', test_acc)
 
+plt.figure(figsize=(12, 8))
+plot_loss(plt.subplot(1, 2, 1), history.epoch, history.history, test_loss)
+plot_acc(plt.subplot(1, 2, 2), history.epoch, history.history, test_acc)
+#plt.legend()
+show()
 

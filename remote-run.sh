@@ -3,9 +3,18 @@
 # How to generate key: https://stackoverflow.com/a/53524211/5258187
 SSH_KEY=~/.ssh/gcloud-test-ml
 
-HOST_ADDR=34.83.191.160
+# instance-1
+#HOST_ADDR=34.83.191.160
+
+# gpu-preemptible-1
+#HOST_ADDR=35.197.30.148
+
+# gpu-preemptible-2
+#HOST_ADDR=34.83.72.35
 
 ./build.sh
+
+echo $HOST_ADDR
 
 rm -fr charts
 scp -i $SSH_KEY docker-run.sh straian@$HOST_ADDR:.
