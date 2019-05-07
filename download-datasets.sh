@@ -19,3 +19,8 @@ mkdir -p datasets/coco/val2017
 gsutil -m rsync gs://images.cocodataset.org/val2017 datasets/coco/val2017
 #gsutil -m rsync gs://images.cocodataset.org/test2017 datasets/coco/test2017
 
+# Manual command to populate npydata from dev machine
+tar -zcvf npydata.tar.gz npydata
+scp -r -i $SSH_KEY npydata.tar.gz straian@$HOST_ADDR:.
+mkdir -p npydata
+

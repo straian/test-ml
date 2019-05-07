@@ -13,13 +13,12 @@ mkdir checkpoints
 docker rm -f $CONTAINER_NAME
 docker run --runtime=nvidia -dit --name=$CONTAINER_NAME \
     -v `pwd`/datasets:/datasets \
+    -v `pwd`/npydata:/npydata \
     -v `pwd`/charts:/charts \
     -v `pwd`/checkpoints:/checkpoints \
     straian/test-ml bash
 
-docker exec -t $CONTAINER_NAME mkdir npydata
-docker exec -t $CONTAINER_NAME python ml/read_coco.py
-docker cp npydata .
+docker exec -t $CONTAINER_NAME python ml/coco.py
 
 # Delete all but last
 cd checkpoints; rm -f `ls|sort -r|awk 'NR>1'`; cd -

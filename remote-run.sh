@@ -19,12 +19,16 @@ echo $HOST_ADDR
 # Serialized numpy inputs
 #scp -i $SSH_KEY npydata straian@$HOST_ADDR:.
 
+rm -fr charts-$HOST_ADDR-old
+rm -fr checkpoints-$HOST_ADDR-old
+cp -r charts-$HOST_ADDR charts-$HOST_ADDR-old
+cp -r checkpoints-$HOST_ADDR checkpoints-$HOST_ADDR-old
 rm -fr charts-$HOST_ADDR
 rm -fr checkpoints-$HOST_ADDR
+
 scp -i $SSH_KEY docker-run.sh straian@$HOST_ADDR:.
 ssh -i $SSH_KEY straian@$HOST_ADDR bash docker-run.sh
 scp -r -i $SSH_KEY straian@$HOST_ADDR:charts charts-$HOST_ADDR
 scp -r -i $SSH_KEY straian@$HOST_ADDR:checkpoints checkpoints-$HOST_ADDR
 open charts-$HOST_ADDR/*.png
-
 

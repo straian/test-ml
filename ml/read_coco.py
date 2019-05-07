@@ -92,6 +92,6 @@ def save_dataset(image_size, train_images, train_targets, val_images, val_target
   np.save(get_name(image_size, len(val_images   ), "val_images"   ), val_images)
   np.save(get_name(image_size, len(val_targets  ), "val_targets"  ), val_targets)
 
-train_images, train_targets, val_images, val_targets = read_dataset(224, 4, None)
-save_dataset(224, train_images, train_targets, val_images, val_targets)
+#train_images, train_targets, val_images, val_targets = read_dataset(224, 1024, 32)
+#save_dataset(224, train_images, train_targets, val_images, val_targets)
 #load_dataset(224, 4, 1)
