@@ -1,6 +1,8 @@
 datasets
 ml/panopticapi
+ml/__pycache__
 plot.png
 .DS_Store
 charts*
 checkpoints*
+npydata

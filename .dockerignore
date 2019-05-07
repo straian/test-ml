@@ -1,4 +1,6 @@
 datasets
 ml/panopticapi
+ml/__pycache__
 charts*
 checkpoints*
+npydata

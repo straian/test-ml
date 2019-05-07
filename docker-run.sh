@@ -17,7 +17,9 @@ docker run --runtime=nvidia -dit --name=$CONTAINER_NAME \
     -v `pwd`/checkpoints:/checkpoints \
     straian/test-ml bash
 
-docker exec -t $CONTAINER_NAME python ml/coco.py
+docker exec -t $CONTAINER_NAME mkdir npydata
+docker exec -t $CONTAINER_NAME python ml/read_coco.py
+docker cp npydata .
 
 # Delete all but last
 cd checkpoints; rm -f `ls|sort -r|awk 'NR>1'`; cd -
