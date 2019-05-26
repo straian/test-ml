@@ -26,23 +26,22 @@ if offline:
   mpl.use("Agg")
 
 def plot_loss(subplot, epochs, history, test_loss = None):
-  val_loss = subplot.plot(epochs, history['val_loss'], '--', label='Val Loss')
-  subplot.plot(epochs, history['loss'], color=val_loss[0].get_color(), label='Train Loss')
-  if test_loss:
-    subplot.plot(epochs, [test_loss] * len(epochs), label='Test loss')
-  subplot.set_xlabel('Epochs')
-  #subplot.set_yscale('log')
-  subplot.set_ylabel('Loss')
-  subplot.set_xlim([0, max(epochs)])
+  plot_metric('loss', 'Loss', subplot, epochs, history, test_loss)
 
-def plot_acc(subplot, epochs, history, test_acc = None):
-  val_acc = subplot.plot(epochs, history['val_acc'], '--', label='Val Accuracy')
-  subplot.plot(epochs, history['acc'], color=val_acc[0].get_color(), label='Train Accuracy')
-  if test_acc:
-    subplot.plot(epochs, [test_acc] * len(epochs), label='Test Accuracy')
+def plot_acc(subplot, epochs, history, test_metric = None):
+  plot_metric('acc', 'Accuracy', subplot, epochs, history, test_metric)
+
+def plot_mae(subplot, epochs, history, test_metric = None):
+  plot_metric('mean_absolute_error', 'Mean Abs Err', subplot, epochs, history, test_metric)
+
+def plot_metric(metric, metric_name, subplot, epochs, history, test_metric = None):
+  val_acc = subplot.plot(epochs, history['val_{}'.format(metric)], '--', label='Val {}'.format(metric_name))
+  subplot.plot(epochs, history[metric], color=val_acc[0].get_color(), label='Train {}'.format(metric_name))
+  if test_metric:
+    subplot.plot(epochs, [test_acc] * len(epochs), label='Test {}'.format(metric_name))
   subplot.set_xlabel('Epochs')
   #subplot.set_yscale('log')
-  subplot.set_ylabel('Accuracy')
+  subplot.set_ylabel(metric_name)
   subplot.set_xlim([0, max(epochs)])
 
 def print_run(
@@ -50,22 +49,25 @@ def print_run(
   plt.figure(figsize=(12, 8))
 
   splt = plt.subplot(2, 4, 1)
-  splt.imshow(train_input)
+  splt.imshow(train_input.astype("float32"))
   splt = plt.subplot(2, 4, 2)
-  splt.imshow(train_target)
+  splt.imshow(train_target.astype("float32"))
   splt = plt.subplot(2, 4, 3)
-  splt.imshow(train_predict)
+  splt.imshow(train_predict.astype("float32"))
 
   plot_loss(plt.subplot(2, 4, 4), list(range(epoch + 1)), history)
 
   splt = plt.subplot(2, 4, 5)
-  splt.imshow(test_input)
+  splt.imshow(test_input.astype("float32"))
   splt = plt.subplot(2, 4, 6)
-  splt.imshow(test_target)
+  splt.imshow(test_target.astype("float32"))
   splt = plt.subplot(2, 4, 7)
-  splt.imshow(test_predict)
+  splt.imshow(test_predict.astype("float32"))
 
-  plot_acc(plt.subplot(2, 4, 8), list(range(epoch + 1)), history)
+  if "acc" in history:
+    plot_acc(plt.subplot(2, 4, 8), list(range(epoch + 1)), history)
+  else:
+    plot_mae(plt.subplot(2, 4, 8), list(range(epoch + 1)), history)
   plt.tight_layout()
   show()
 

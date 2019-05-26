@@ -10,7 +10,7 @@ export HOST_ADDR=34.83.191.160
 #export HOST_ADDR=34.83.72.35
 
 # gpu-preemptible-3
-#export HOST_ADDR=104.196.235.166
+#export HOST_ADDR=35.212.178.217
 
 # gpu-preemptible-4
 #export HOST_ADDR=35.212.176.78

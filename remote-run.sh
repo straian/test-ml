@@ -13,14 +13,15 @@ SSH_KEY=~/.ssh/gcloud-test-ml
 #HOST_ADDR=34.83.72.35
 
 # gpu-preemptible-3
-#HOST_ADDR=104.196.235.166
+#HOST_ADDR=35.212.178.217
 
 # gpu-preemptible-4
 #HOST_ADDR=35.212.176.78
 
-./build.sh
-
 echo $HOST_ADDR
+$HOST_ADDR && exit 1
+
+./build.sh
 
 # Serialized numpy inputs
 #scp -i $SSH_KEY npydata straian@$HOST_ADDR:.

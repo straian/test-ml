@@ -5,11 +5,7 @@ import psutil
 import math
 import subprocess
 
-import plot_coco
-
 from matplotlib.path import Path
-import matplotlib.patches as patches
-import matplotlib.pyplot as plt
 
 from random import shuffle
 
@@ -27,18 +23,17 @@ def pad(img):
 PRINT_COUNT_INTERVAL = 50
 PRINT_MEMORY_INTERVAL = 1000
 
-PLACES_SIZE = 256
-PLACES_MAX_COUNT = 1
+PLACES_MAX_COUNT = 1000000
 
 #https://stackoverflow.com/questions/50731785/create-random-shape-contour-using-matplotlib
-def generate_random_shape():
+def generate_random_shape(image_size):
   n = 8 # Number of possibly sharp edges
   r = .5 # magnitude of the perturbation from the unit circle,
   # should be between 0 and 1
   N = n*3+1 # number of points in the Path
   # There is the initial point and 3 points per cubic bezier curve. Thus, the curve will only pass though n points, which will be the sharp edges, the other 2 modify the shape of the bezier curve
   angles = np.linspace(0,2*np.pi,N)
-  codes = np.full(N,Path.CURVE4)
+  codes = np.full(N, Path.CURVE4)
   codes[0] = Path.MOVETO
   lengths = (2*r*np.random.random(N)+1-r) / (1 + r)
   # Alter lengths: [-1, 1] to [-X/2, X/2]
@@ -53,20 +48,19 @@ def generate_random_shape():
   diff = max_fill_ratio - min_fill_ratio
   verts_x = move_x + np.cos(angles) * lengths * scale_x
   verts_y = move_y + np.sin(angles) * lengths * scale_y
-  size = PLACES_SIZE
-  verts_x *= size
-  verts_y *= size
+  verts_x *= image_size
+  verts_y *= image_size
   verts_x = np.uint16(verts_x)
   verts_y = np.uint16(verts_y)
-  img = np.zeros((size, size), dtype=np.uint8)
+  img = np.zeros((image_size, image_size), dtype=np.uint8)
   rr, cc = skimage.draw.polygon(verts_x, verts_y)
   img[rr, cc] = 1
   return img
 
-def generate_random_shapes():
-  img = generate_random_shape()
+def generate_random_shapes(image_size):
+  img = generate_random_shape(image_size)
   for _ in range(4):
-    img = img | generate_random_shape()
+    img = img | generate_random_shape(image_size)
   return img
 
 def run_cmd(cmd):
@@ -76,25 +70,31 @@ def run_cmd(cmd):
       universal_newlines=True).communicate()[0].split("\n")))
 
 def read_set_places(data_type, image_size, count=None):
-  data_dir='datasets/places365_standard/train'
-  img_files = run_cmd("find {} -type f".format(data_dir))
+  data_dir='datasets/places365_standard/{}'.format(data_type)
+  img_files = run_cmd("find {} -type f -size +1".format(data_dir))
   if not count:
     count = len(img_files)
   count = min(count, len(img_files), PLACES_MAX_COUNT)
-  images = np.zeros([count, image_size, image_size, 4], dtype='uint8')
-  targets = np.zeros([count, image_size, image_size, 3], dtype='uint8')
+  images = np.zeros([count, image_size, image_size, 4], dtype='float16')
+  targets = np.zeros([count, image_size, image_size, 3], dtype='float16')
   shuffle(img_files)
   print("Count: ", data_type, len(img_files))
   for i in range(count):
+    print("read_set_places ", i, img_files[i])
     input_img = skimage.io.imread(img_files[i])
-    input_img = input_img * 1.
-    input_img = np.array(skimage.transform.resize(input_img, (image_size, image_size), anti_aliasing=True), dtype='uint8')
+    input_img = input_img / 256.
+    if (len(input_img.shape) < 3):
+      # Add one extra dim
+      print(input_img.shape)
+      input_img = np.array([input_img.transpose(), input_img.transpose(), input_img.transpose()]).transpose()
+      print(input_img.shape)
+    input_img = np.array(skimage.transform.resize(input_img, (image_size, image_size), anti_aliasing=True), dtype='float16')
     targets[i] = input_img
     # Sometimes don't add a mask.
-    if (np.random.random() < 0.05):
-      mask = np.zeros([image_size, image_size, 1], dtype="uint8")
-    else:
-      mask = generate_random_shapes().reshape(image_size, image_size, 1)
+    #if (np.random.random() < 0.05):
+    #  mask = np.zeros([image_size, image_size, 1], dtype="uint8")
+    #else:
+    mask = generate_random_shapes(image_size).reshape(image_size, image_size, 1)
     input_img *= np.logical_not(mask)
     images[i] = np.append(input_img, mask, axis=2)
     i += 1
@@ -102,16 +102,6 @@ def read_set_places(data_type, image_size, count=None):
   print("images.nbytes: ", images.shape, images.nbytes, targets.shape, targets.nbytes)
   print("Memory info: ", psutil.virtual_memory())
   return images, targets
-
-images, targets = read_set_places("train", 256)
-plt.figure(figsize=(12, 6))
-splt = plt.subplot(1, 3, 1)
-splt.imshow(targets[0])
-splt = plt.subplot(1, 3, 2)
-splt.imshow(images[0][:,:,-1])
-splt = plt.subplot(1, 3, 3)
-splt.imshow(images[0][:,:,0:3])
-plot_coco.show()
 
 def read_set_coco(data_type, image_size, count=None):
   data_dir='datasets/coco'

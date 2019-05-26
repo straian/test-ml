@@ -5,4 +5,5 @@ plot.png
 .DS_Store
 charts
 checkpoints
+images
 npydata*
