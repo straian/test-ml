@@ -3,6 +3,6 @@ ml/panopticapi
 ml/__pycache__
 plot.png
 .DS_Store
-charts*
-checkpoints*
+charts
+checkpoints
 npydata*

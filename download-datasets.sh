@@ -5,6 +5,9 @@ wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip -P d
 sudo apt-get install unzip
 unzip -o datasets/coco/annotations_trainval2017.zip -d datasets/coco
 
+mkdir -p datasets/places
+wget http://data.csail.mit.edu/places/places365/places365standard_easyformat.tar -P datasets/places
+
 # NOT NEEDED on GCE! If you do need it, you might need to install python 2.7 first:
 #sudo apt-get install python
 #curl https://sdk.cloud.google.com | bash

@@ -6,7 +6,7 @@ from tensorflow.python.client import device_lib
 
 import psutil
 
-import read_coco
+import read_dataset
 import plot_coco
 
 # Use half precision
@@ -25,7 +25,7 @@ EPOCHS = 50 if GPUS else 2
 TRAIN_SAMPLES = None if GPUS else 4
 VAL_SAMPLES = None if GPUS else 1
 
-BATCH_SIZE = (32 * GPUS) if GPUS else 4
+BATCH_SIZE = (16 * GPUS) if GPUS else 4
 CHART_INTERVAL = 1
 MEMORY_INTERVAL = 10
 MEMORY_INTERVAL_READ = 1000
@@ -42,37 +42,55 @@ model = keras.Sequential([
     # https://www.reddit.com/r/MachineLearning/comments/9g7m9x/d_what_would_happen_if_a_model_used_batch/?depth=2
     keras.layers.BatchNormalization(),
     keras.layers.Conv2D(64, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
+    keras.layers.Dropout(0.2),
     keras.layers.Conv2D(64, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
+    keras.layers.Dropout(0.2),
     keras.layers.MaxPooling2D(),
     keras.layers.Conv2D(128, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
+    keras.layers.Dropout(0.2),
     keras.layers.Conv2D(128, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
+    keras.layers.Dropout(0.2),
     keras.layers.MaxPooling2D(),
     keras.layers.Conv2D(256, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
+    keras.layers.Dropout(0.2),
     keras.layers.Conv2D(256, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
+    keras.layers.Dropout(0.2),
     keras.layers.MaxPooling2D(),
     keras.layers.Conv2D(512, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
+    keras.layers.Dropout(0.2),
     keras.layers.Conv2D(512, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
+    keras.layers.Dropout(0.2),
     keras.layers.MaxPooling2D(),
     keras.layers.Conv2D(512, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
-    keras.layers.Conv2D(512, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
+    keras.layers.Dropout(0.2),
+    keras.layers.Conv2DTranspose(512, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
+    keras.layers.Dropout(0.2),
     keras.layers.UpSampling2D(),
-    keras.layers.Conv2D(512, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
-    keras.layers.Conv2D(512, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
+    keras.layers.Conv2DTranspose(512, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
+    keras.layers.Dropout(0.2),
+    keras.layers.Conv2DTranspose(512, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
+    keras.layers.Dropout(0.2),
     keras.layers.UpSampling2D(),
-    keras.layers.Conv2D(256, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
-    keras.layers.Conv2D(256, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
+    keras.layers.Conv2DTranspose(256, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
+    keras.layers.Dropout(0.2),
+    keras.layers.Conv2DTranspose(256, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
+    keras.layers.Dropout(0.2),
     keras.layers.UpSampling2D(),
-    keras.layers.Conv2D(128, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
-    keras.layers.Conv2D(128, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
+    keras.layers.Conv2DTranspose(128, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
+    keras.layers.Dropout(0.2),
+    keras.layers.Conv2DTranspose(128, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
+    keras.layers.Dropout(0.2),
     keras.layers.UpSampling2D(),
-    keras.layers.Conv2D(64, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
-    keras.layers.Conv2D(64, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
-    keras.layers.Conv2D(1, (1, 1), padding='same', activation=tf.nn.sigmoid),
+    keras.layers.Conv2DTranspose(64, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
+    keras.layers.Dropout(0.2),
+    keras.layers.Conv2DTranspose(64, KERNEL, padding='same'), keras.layers.BatchNormalization(), keras.layers.ReLU(),
+    keras.layers.Dropout(0.2),
+    keras.layers.Conv2DTranspose(1, (1, 1), padding='same', activation=tf.nn.sigmoid),
     keras.layers.Reshape((IMAGE_SIZE, IMAGE_SIZE))
 ])
 print(model.summary())
 
-train_images, train_targets, val_images, val_targets = read_coco.load_dataset(IMAGE_SIZE, TRAIN_SAMPLES, VAL_SAMPLES)
+train_images, train_targets, val_images, val_targets = read_dataset.load_dataset(IMAGE_SIZE, TRAIN_SAMPLES, VAL_SAMPLES)
 test_images = val_images
 test_targets = val_targets
 
@@ -113,7 +131,7 @@ def epoch_report(epoch, logs):
 
 fit_callback = keras.callbacks.LambdaCallback(
     on_epoch_end=lambda epoch, logs: epoch_report(epoch, logs))
-model_checkpoint = keras.callbacks.ModelCheckpoint("checkpoints/weights.{epoch:02d}-{val_loss:.2f}.hdf5", save_best_only=True)
+model_checkpoint = keras.callbacks.ModelCheckpoint("checkpoints/weights.{epoch:02d}-{val_loss:.3f}.hdf5", save_best_only=True)
 
 #with tf.device("/cpu:0"):
 #with tf.device("/device:GPU:0"):
