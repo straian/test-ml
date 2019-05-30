@@ -17,7 +17,7 @@ N = 1
 model1 = keras.models.load_model("checkpoints/checkpoints-coco/weights.08-0.08.hdf5")
 print(model1.summary())
 
-model2 = keras.models.load_model("checkpoints/checkpoints-places/weights.15-0.004.hdf5")
+model2 = keras.models.load_model("checkpoints/checkpoints-places/weights.19-0.003.hdf5")
 print(model2.summary())
 
 _, _, test_images, test_targets = read_dataset.load_dataset(IMAGE_SIZE, 8, 8) # 8, 8 is for sure COCO
