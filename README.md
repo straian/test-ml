@@ -44,7 +44,7 @@ A encoder - decoder network was used:
 Total is about 30M free params
 
 
-Ran for 30 epochs, overfitting started after ~15 epochs. The photo below shows one pic from the dataset and one from the test set. About 97% accuracy on the validation dataset was achieved.
+Ran for 30 epochs, overfitting started after ~15 epochs. The photo below shows one pic from the dataset and one from the test set. About 97% accuracy on the validation dataset was achieved. The first pic is the original. The second pic is the training target acquired from the Coco dataset. The thirc pic is the network's output at the end of the 30th epoch.
 
 ![](plot-30.png)
 
