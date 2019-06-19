@@ -1,4 +1,4 @@
-# The Vanisher Network
+# The Vanisher Neural Net
 
 May 2018
 
