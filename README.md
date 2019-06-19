@@ -1,4 +1,11 @@
-# Computer vision project for removing people from the environment
+# The Vanisher Network
+
+May 2018
+
+The idea of this project is to remove artificial items from a photo, e.g. cars, buildings, or people in nature photograpy. This is not a new idea -- removing people from photos has some dark history to it.
+
+![](stalin-composite-16x9.jpg)
+
 
 The project is composed of two parts (two neural nets):
 
